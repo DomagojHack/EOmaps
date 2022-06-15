@@ -40,18 +40,16 @@ https://github.com/geopandas/geopandas/issues/2387
 
 """
 
-from cartopy import crs as ccrs
-import numpy as np
+import geopandas as gpd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-
+import numpy as np
+from cartopy import crs as ccrs
 from matplotlib import _blocking_input
 from matplotlib.backend_bases import MouseButton
-import matplotlib as mpl
-
+from scipy.interpolate import splev, splprep
 from shapely.geometry import Polygon
-import geopandas as gpd
-from scipy.interpolate import splprep, splev
-
+import eomaps._shapes as eoshp
 
 # This is basically a copy of matplotlib's ginput function adapted to work with EOmaps
 # matplotlib's original ginput function is here:
@@ -206,7 +204,8 @@ def ginput(
     if draw_on_drag:
         eventnames.append("motion_notify_event")
 
-    _blocking_input.blocking_input_loop(canvas.figure, eventnames, timeout, handler)
+    _blocking_input.blocking_input_loop(
+        canvas.figure, eventnames, timeout, handler)
 
     # Cleanup.
     if plt.fignum_exists(m.figure.f.number):
@@ -376,7 +375,8 @@ def ginput2(
     if draw_on_drag:
         eventnames.append("motion_notify_event")
 
-    _blocking_input.blocking_input_loop(canvas.figure, eventnames, timeout, handler)
+    _blocking_input.blocking_input_loop(
+        canvas.figure, eventnames, timeout, handler)
 
     # Cleanup.
     if plt.fignum_exists(m.figure.f.number):
@@ -390,8 +390,6 @@ def ginput2(
 
 
 # ----------------------------------------------------------------------------------
-
-import eomaps._shapes as eoshp
 
 
 class shape_drawer:
@@ -441,14 +439,14 @@ class shape_drawer:
             # copied from "scipy.interpolate.fitpack.splprep"
 
             A smoothing condition. The amount of smoothness is determined by
-            satisfying the conditions: sum((w * (y - g))**2,axis=0) <= s, where g(x)
-            is the smoothed interpolation of (x,y). The user can use s to control
-            the trade-off between closeness and smoothness of fit. Larger s means
-            more smoothing while smaller values of s indicate less smoothing.
-            Recommended values of s depend on the weights, w. If the weights
-            represent the inverse of the standard-deviation of y, then a good
-            s value should be found in the range (m-sqrt(2*m),m+sqrt(2*m)),
-            where m is the number of data points in x, y, and w.
+            satisfying the conditions: sum((w * (y - g))**2,axis=0) <= s, where
+            g(x) is the smoothed interpolation of (x,y). The user can use s to
+            control the trade-off between closeness and smoothness of fit.
+            Larger s means more smoothing while smaller values of s indicate
+            less smoothing. Recommended values of s depend on the weights, w.
+            If the weights represent the inverse of the standard-deviation of
+            y, then a good s value should be found in the range (m-sqrt(2*m),
+            m+sqrt(2*m)), where m is the number of data points in x, y, and w.
 
             The default is False.
         draw_on_drag : bool, optional
@@ -538,7 +536,9 @@ class shape_drawer:
 
             r = np.sqrt(sum((pts[1] - pts[0]) ** 2))
             pts = eoshp.shapes._ellipses(self._m)._get_ellipse_points(
-                np.array([pts[0][0]]), np.array([pts[0][1]]), "out", [r, r], "out", 100
+                np.array(
+                    [pts[0][0]]
+                    ), np.array([pts[0][1]]), "out", [r, r], "out", 100
             )
 
             (ph,) = self._m.ax.fill(pts[0][0], pts[1][0], **kwargs)
@@ -583,7 +583,12 @@ class shape_drawer:
 
                 r = abs(x - pts[0][0]), abs(y - pts[0][1])
                 pts = eoshp.shapes._rectangles(self._m)._get_rectangle_verts(
-                    np.array([pts[0][0]]), np.array([pts[0][1]]), "out", r, "out", 50
+                    np.array([pts[0][0]]),
+                    np.array([pts[0][1]]),
+                    "out",
+                    r,
+                    "out",
+                    50
                 )[0][0]
                 (ph,) = self._m.ax.fill(
                     pts[:, 0], pts[:, 1], fc="none", ec="r", animated=True
@@ -597,7 +602,12 @@ class shape_drawer:
             r = abs(pts[1][0] - pts[0][0]), abs(pts[1][1] - pts[0][1])
 
             pts = eoshp.shapes._rectangles(self._m)._get_rectangle_verts(
-                np.array([pts[0][0]]), np.array([pts[0][1]]), "out", r, "out", 50
+                np.array([pts[0][0]]),
+                np.array([pts[0][1]]),
+                "out",
+                r,
+                "out",
+                50
             )[0][0]
 
             (ph,) = self._m.ax.fill(pts[:, 0], pts[:, 1], **kwargs)
